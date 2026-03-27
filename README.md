@@ -26,6 +26,8 @@ npx wx-mini-program-publisher \
   --robot 1
 ```
 
+其中 `--version` 为可选；不传时会直接读取流水线环境变量 `CI_BUILD_NUMBER`。
+
 ## 环境变量
 
 ### 必填
@@ -40,7 +42,7 @@ npx wx-mini-program-publisher \
 ### 可选
 
 - `WX_PROJECT_PATH`：小程序项目目录，默认当前目录
-- `WX_VERSION`：版本号，默认自动生成
+- `CI_BUILD_NUMBER`：流水线构建号，作为默认版本号（必需，除非显式传 `--version`）
 - `WX_DESC`：版本描述
 - `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串
@@ -52,7 +54,7 @@ npx wx-mini-program-publisher \
   env:
     WX_APPID: ${{ secrets.WX_APPID }}
     WX_PRIVATE_KEY_BASE64: ${{ secrets.WX_PRIVATE_KEY_BASE64 }}
-    WX_VERSION: ${{ github.sha }}
+    CI_BUILD_NUMBER: ${{ github.run_number }}
     WX_DESC: ${{ github.event.head_commit.message }}
   run: npx wx-mini-program-publisher --project-path ./miniprogram --robot 1
 ```

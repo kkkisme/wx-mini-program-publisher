@@ -15,7 +15,7 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
-  -v, --version <version>     发布版本号 (默认: 取环境变量 WX_VERSION / CI_COMMIT_TAG / GIT_COMMIT)
+  -v, --version <version>     发布版本号 (可选；默认读取 CI Build Number)
   -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
@@ -32,10 +32,10 @@ function printHelp() {
 
   # 可选
   WX_PROJECT_PATH
-  WX_VERSION
   WX_DESC
   WX_ROBOT
   WX_CI_SETTING_JSON
+  CI_BUILD_NUMBER
 `);
 }
 
@@ -103,25 +103,23 @@ function firstNonEmpty(...values) {
   return undefined;
 }
 
-function buildVersion() {
+function resolveVersion(versionFromArgs) {
   const candidate = firstNonEmpty(
-    process.env.WX_VERSION,
-    process.env.CI_COMMIT_TAG,
-    process.env.GIT_COMMIT
+    versionFromArgs,
+    process.env.CI_BUILD_NUMBER,
+    process.env.BUILD_NUMBER,
+    process.env.CI_PIPELINE_IID,
+    process.env.CI_PIPELINE_ID,
+    process.env.GITHUB_RUN_NUMBER
   );
-  if (candidate) return candidate.slice(0, 64);
 
-  const now = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    "-",
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join("");
+  if (!candidate) {
+    throw new Error(
+      "未找到版本号：请传入 --version，或在流水线中设置 CI_BUILD_NUMBER"
+    );
+  }
+
+  return candidate.slice(0, 64);
 }
 
 function readPrivateKey() {
@@ -163,7 +161,7 @@ async function main() {
   const projectPath = path.resolve(
     firstNonEmpty(args.projectPath, process.env.WX_PROJECT_PATH) || process.cwd()
   );
-  const version = firstNonEmpty(args.version) || buildVersion();
+  const version = resolveVersion(args.version);
   const desc =
     firstNonEmpty(args.desc, process.env.WX_DESC, process.env.CI_COMMIT_MESSAGE) ||
     "auto publish by CI";
