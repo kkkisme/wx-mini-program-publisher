@@ -15,7 +15,6 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
-  -v, --version <version>     发布版本号 (可选；默认读取 CI Build Number)
   -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
@@ -35,7 +34,7 @@ function printHelp() {
   WX_DESC
   WX_ROBOT
   WX_CI_SETTING_JSON
-  CI_BUILD_NUMBER
+  CI_BUILD_NUMBER (发布版本号；若未设置则自动回退为日期格式)
 `);
 }
 
@@ -44,7 +43,6 @@ function parseArgs(argv) {
     help: false,
     dryRun: false,
     projectPath: undefined,
-    version: undefined,
     desc: undefined,
     robot: undefined,
     settingJson: undefined,
@@ -63,11 +61,6 @@ function parseArgs(argv) {
       case "-p":
       case "--project-path":
         args.projectPath = argv[i + 1];
-        i += 1;
-        break;
-      case "-v":
-      case "--version":
-        args.version = argv[i + 1];
         i += 1;
         break;
       case "-d":
@@ -103,23 +96,24 @@ function firstNonEmpty(...values) {
   return undefined;
 }
 
-function resolveVersion(versionFromArgs) {
-  const candidate = firstNonEmpty(
-    versionFromArgs,
-    process.env.CI_BUILD_NUMBER,
-    process.env.BUILD_NUMBER,
-    process.env.CI_PIPELINE_IID,
-    process.env.CI_PIPELINE_ID,
-    process.env.GITHUB_RUN_NUMBER
-  );
+function buildDateFallbackVersion() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return [
+    now.getFullYear(),
+    pad(now.getMonth() + 1),
+    pad(now.getDate()),
+    "-",
+    pad(now.getHours()),
+    pad(now.getMinutes()),
+    pad(now.getSeconds()),
+  ].join("");
+}
 
-  if (!candidate) {
-    throw new Error(
-      "未找到版本号：请传入 --version，或在流水线中设置 CI_BUILD_NUMBER"
-    );
-  }
-
-  return candidate.slice(0, 64);
+function resolveVersion() {
+  const buildNumber = firstNonEmpty(process.env.CI_BUILD_NUMBER);
+  if (buildNumber) return buildNumber.slice(0, 64);
+  return buildDateFallbackVersion();
 }
 
 function readPrivateKey() {
@@ -161,7 +155,7 @@ async function main() {
   const projectPath = path.resolve(
     firstNonEmpty(args.projectPath, process.env.WX_PROJECT_PATH) || process.cwd()
   );
-  const version = resolveVersion(args.version);
+  const version = resolveVersion();
   const desc =
     firstNonEmpty(args.desc, process.env.WX_DESC, process.env.CI_COMMIT_MESSAGE) ||
     "auto publish by CI";

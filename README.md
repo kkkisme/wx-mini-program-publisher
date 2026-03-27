@@ -21,12 +21,13 @@ npx wx-mini-publish
 ```bash
 npx wx-mini-program-publisher \
   --project-path ./miniprogram \
-  --version 1.2.3 \
   --desc "ci auto release" \
   --robot 1
 ```
 
-其中 `--version` 为可选；不传时会直接读取流水线环境变量 `CI_BUILD_NUMBER`。
+版本号固定策略：
+- 优先使用流水线环境变量 `CI_BUILD_NUMBER`
+- 若未设置则自动用当前日期时间兜底（格式：`YYYYMMDD-HHmmss`）
 
 ## 环境变量
 
@@ -42,7 +43,7 @@ npx wx-mini-program-publisher \
 ### 可选
 
 - `WX_PROJECT_PATH`：小程序项目目录，默认当前目录
-- `CI_BUILD_NUMBER`：流水线构建号，作为默认版本号（必需，除非显式传 `--version`）
+- `CI_BUILD_NUMBER`：流水线构建号，作为发布版本号优先值
 - `WX_DESC`：版本描述
 - `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串
