@@ -8,12 +8,6 @@
 npx -y wx-mini-program-publisher@0.1.0
 ```
 
-如需使用别名命令，可用 `-p` 指定包名：
-
-```bash
-npx -y -p wx-mini-program-publisher@0.1.0 wx-mini-publish
-```
-
 也可以带参数：
 
 ```bash
