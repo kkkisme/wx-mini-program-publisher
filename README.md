@@ -2,12 +2,6 @@
 
 一个可通过 `npx` 直接调用的微信小程序自动发布脚本，适合在 CI/CD 流水线中使用。
 
-## 安装依赖
-
-```bash
-npm install
-```
-
 ## 通过 npx 调用
 
 ```bash
@@ -25,15 +19,14 @@ npx wx-mini-program-publisher \
   --robot 1
 ```
 
-版本号固定策略：
-- 优先使用流水线环境变量 `CI_BUILD_NUMBER`
-- 若未设置则自动用当前日期时间兜底（格式：`YYYYMMDD-HHmmss`）
+发布版本号固定读取流水线环境变量：`CI_BUILD_NUMBER`。
 
 ## 环境变量
 
 ### 必填
 
 - `WX_APPID`（或 `APPID`）
+- `CI_BUILD_NUMBER`：流水线构建号，作为发布版本号
 - 私钥（二选一）
   - `WX_PRIVATE_KEY_BASE64`（或 `PRIVATE_KEY_BASE64`）：推荐，放 base64 编码后的私钥内容
   - `WX_PRIVATE_KEY`（或 `PRIVATE_KEY`）：明文私钥，支持 `\n` 自动转真实换行
@@ -43,7 +36,6 @@ npx wx-mini-program-publisher \
 ### 可选
 
 - `WX_PROJECT_PATH`：小程序项目目录，默认当前目录
-- `CI_BUILD_NUMBER`：流水线构建号，作为发布版本号优先值
 - `WX_DESC`：版本描述
 - `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串

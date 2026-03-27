@@ -34,7 +34,9 @@ function printHelp() {
   WX_DESC
   WX_ROBOT
   WX_CI_SETTING_JSON
-  CI_BUILD_NUMBER (发布版本号；若未设置则自动回退为日期格式)
+  
+  # 必填版本号
+  CI_BUILD_NUMBER
 `);
 }
 
@@ -96,24 +98,12 @@ function firstNonEmpty(...values) {
   return undefined;
 }
 
-function buildDateFallbackVersion() {
-  const now = new Date();
-  const pad = (n) => String(n).padStart(2, "0");
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    "-",
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join("");
-}
-
 function resolveVersion() {
   const buildNumber = firstNonEmpty(process.env.CI_BUILD_NUMBER);
-  if (buildNumber) return buildNumber.slice(0, 64);
-  return buildDateFallbackVersion();
+  if (!buildNumber) {
+    throw new Error("未找到版本号，请在流水线环境变量中设置 CI_BUILD_NUMBER");
+  }
+  return buildNumber.slice(0, 64);
 }
 
 function readPrivateKey() {
