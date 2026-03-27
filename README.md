@@ -19,14 +19,16 @@ npx wx-mini-program-publisher \
   --robot 1
 ```
 
-发布版本号固定读取流水线环境变量：`CI_BUILD_NUMBER`。
+发布版本号读取规则：
+- 默认读取环境变量 `BUILD_NUMBER`
+- 可通过参数 `--build-number-env <name>` 或环境变量 `WX_BUILD_NUMBER_ENV` 指定“读取哪个环境变量作为版本号”
 
 ## 环境变量
 
 ### 必填
 
 - `WX_APPID`（或 `APPID`）
-- `CI_BUILD_NUMBER`：流水线构建号，作为发布版本号
+- `BUILD_NUMBER`：流水线构建号，默认作为发布版本号
 - 私钥（二选一）
   - `WX_PRIVATE_KEY_BASE64`（或 `PRIVATE_KEY_BASE64`）：推荐，放 base64 编码后的私钥内容
   - `WX_PRIVATE_KEY`（或 `PRIVATE_KEY`）：明文私钥，支持 `\n` 自动转真实换行
@@ -36,6 +38,7 @@ npx wx-mini-program-publisher \
 ### 可选
 
 - `WX_PROJECT_PATH`：小程序项目目录，默认当前目录
+- `WX_BUILD_NUMBER_ENV`：版本号来源环境变量名（默认 `BUILD_NUMBER`）
 - `WX_DESC`：版本描述
 - `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串
@@ -47,7 +50,13 @@ npx wx-mini-program-publisher \
   env:
     WX_APPID: ${{ secrets.WX_APPID }}
     WX_PRIVATE_KEY_BASE64: ${{ secrets.WX_PRIVATE_KEY_BASE64 }}
-    CI_BUILD_NUMBER: ${{ github.run_number }}
+    BUILD_NUMBER: ${{ github.run_number }}
     WX_DESC: ${{ github.event.head_commit.message }}
   run: npx wx-mini-program-publisher --project-path ./miniprogram --robot 1
+```
+
+如果你的流水线编号变量名不是 `BUILD_NUMBER`，可以这样指定：
+
+```bash
+npx wx-mini-program-publisher --build-number-env CI_BUILD_NUMBER
 ```

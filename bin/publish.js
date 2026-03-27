@@ -15,6 +15,7 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
+      --build-number-env <name>  版本号环境变量名 (默认: BUILD_NUMBER)
   -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
@@ -35,8 +36,9 @@ function printHelp() {
   WX_ROBOT
   WX_CI_SETTING_JSON
   
-  # 必填版本号
-  CI_BUILD_NUMBER
+  # 版本号
+  BUILD_NUMBER (默认变量名，可通过 --build-number-env 或 WX_BUILD_NUMBER_ENV 覆盖)
+  WX_BUILD_NUMBER_ENV
 `);
 }
 
@@ -45,6 +47,7 @@ function parseArgs(argv) {
     help: false,
     dryRun: false,
     projectPath: undefined,
+    buildNumberEnv: undefined,
     desc: undefined,
     robot: undefined,
     settingJson: undefined,
@@ -63,6 +66,10 @@ function parseArgs(argv) {
       case "-p":
       case "--project-path":
         args.projectPath = argv[i + 1];
+        i += 1;
+        break;
+      case "--build-number-env":
+        args.buildNumberEnv = argv[i + 1];
         i += 1;
         break;
       case "-d":
@@ -98,10 +105,21 @@ function firstNonEmpty(...values) {
   return undefined;
 }
 
-function resolveVersion() {
-  const buildNumber = firstNonEmpty(process.env.CI_BUILD_NUMBER);
+function resolveVersion(buildNumberEnvFromArgs) {
+  const buildNumberEnvName = firstNonEmpty(
+    buildNumberEnvFromArgs,
+    process.env.WX_BUILD_NUMBER_ENV,
+    "BUILD_NUMBER"
+  );
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(buildNumberEnvName)) {
+    throw new Error(`无效的版本号环境变量名: ${buildNumberEnvName}`);
+  }
+
+  const buildNumber = firstNonEmpty(process.env[buildNumberEnvName]);
   if (!buildNumber) {
-    throw new Error("未找到版本号，请在流水线环境变量中设置 CI_BUILD_NUMBER");
+    throw new Error(
+      `未找到版本号，请在流水线环境变量中设置 ${buildNumberEnvName}`
+    );
   }
   return buildNumber.slice(0, 64);
 }
@@ -145,7 +163,7 @@ async function main() {
   const projectPath = path.resolve(
     firstNonEmpty(args.projectPath, process.env.WX_PROJECT_PATH) || process.cwd()
   );
-  const version = resolveVersion();
+  const version = resolveVersion(args.buildNumberEnv);
   const desc =
     firstNonEmpty(args.desc, process.env.WX_DESC, process.env.CI_COMMIT_MESSAGE) ||
     "auto publish by CI";
