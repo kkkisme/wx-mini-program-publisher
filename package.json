@@ -1,0 +1,22 @@
+{
+  "name": "wx-mini-program-publisher",
+  "version": "0.1.0",
+  "description": "CLI for publishing WeChat Mini Programs in CI",
+  "bin": {
+    "wx-mini-program-publisher": "bin/publish.js",
+    "wx-mini-publish": "bin/publish.js"
+  },
+  "scripts": {
+    "publish:help": "node bin/publish.js --help"
+  },
+  "keywords": [
+    "wechat",
+    "miniprogram",
+    "ci",
+    "publish"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "miniprogram-ci": "^2.1.12"
+  }
+}
