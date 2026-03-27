@@ -5,19 +5,21 @@
 ## 通过 npx 调用
 
 ```bash
-npx wx-mini-program-publisher
+npx -y wx-mini-program-publisher@0.1.0
 # 或
-npx wx-mini-publish
+npx -y wx-mini-publish@0.1.0
 ```
 
 也可以带参数：
 
 ```bash
-npx wx-mini-program-publisher \
+npx -y wx-mini-program-publisher@0.1.0 \
   --project-path ./miniprogram \
   --desc "ci auto release" \
   --robot 1
 ```
+
+> 建议在 CI 中始终使用 `-y`（跳过交互确认）并固定版本号（如 `@0.1.0`）以保证发布流程稳定可复现。
 
 发布版本号读取规则：
 - 默认读取环境变量 `BUILD_NUMBER`
@@ -52,11 +54,11 @@ npx wx-mini-program-publisher \
     WX_PRIVATE_KEY_BASE64: ${{ secrets.WX_PRIVATE_KEY_BASE64 }}
     BUILD_NUMBER: ${{ github.run_number }}
     WX_DESC: ${{ github.event.head_commit.message }}
-  run: npx wx-mini-program-publisher --project-path ./miniprogram --robot 1
+  run: npx -y wx-mini-program-publisher@0.1.0 --project-path ./miniprogram --robot 1
 ```
 
 如果你的流水线编号变量名不是 `BUILD_NUMBER`，可以这样指定：
 
 ```bash
-npx wx-mini-program-publisher --build-number-env CI_BUILD_NUMBER
+npx -y wx-mini-program-publisher@0.1.0 --build-number-env CI_BUILD_NUMBER
 ```
