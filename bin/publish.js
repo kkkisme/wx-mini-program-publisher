@@ -15,7 +15,7 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
-      --build-number-env <name>  构建号环境变量名（必填，可用 WX_BUILD_NUMBER_ENV 提供）
+      --build-number-env <name>  构建号环境变量名（默认: BUILD_NUMBER，可用 WX_BUILD_NUMBER_ENV 覆盖）
   -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
@@ -107,13 +107,9 @@ function firstNonEmpty(...values) {
 function resolveVersion(buildNumberEnvFromArgs) {
   const buildNumberEnvName = firstNonEmpty(
     buildNumberEnvFromArgs,
-    process.env.WX_BUILD_NUMBER_ENV
+    process.env.WX_BUILD_NUMBER_ENV,
+    "BUILD_NUMBER"
   );
-  if (!buildNumberEnvName) {
-    throw new Error(
-      "未指定构建号变量名，请通过 --build-number-env 或 WX_BUILD_NUMBER_ENV 提供"
-    );
-  }
   if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(buildNumberEnvName)) {
     throw new Error(`无效的版本号环境变量名: ${buildNumberEnvName}`);
   }
