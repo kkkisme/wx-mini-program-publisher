@@ -15,7 +15,6 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
-      --build-number-env <name>  构建号环境变量名（默认: BUILD_NUMBER，可用 WX_BUILD_NUMBER_ENV 覆盖）
   -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
@@ -37,7 +36,7 @@ function printHelp() {
   WX_CI_SETTING_JSON
   
   # 版本号
-  WX_BUILD_NUMBER_ENV
+  BUILD_NUMBER (可选；若缺失则使用当前分钟 mm)
 `);
 }
 
@@ -46,7 +45,6 @@ function parseArgs(argv) {
     help: false,
     dryRun: false,
     projectPath: undefined,
-    buildNumberEnv: undefined,
     desc: undefined,
     robot: undefined,
     settingJson: undefined,
@@ -65,10 +63,6 @@ function parseArgs(argv) {
       case "-p":
       case "--project-path":
         args.projectPath = argv[i + 1];
-        i += 1;
-        break;
-      case "--build-number-env":
-        args.buildNumberEnv = argv[i + 1];
         i += 1;
         break;
       case "-d":
@@ -104,23 +98,20 @@ function firstNonEmpty(...values) {
   return undefined;
 }
 
-function resolveVersion(buildNumberEnvFromArgs) {
-  const buildNumberEnvName = firstNonEmpty(
-    buildNumberEnvFromArgs,
-    process.env.WX_BUILD_NUMBER_ENV,
-    "BUILD_NUMBER"
-  );
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(buildNumberEnvName)) {
-    throw new Error(`无效的版本号环境变量名: ${buildNumberEnvName}`);
-  }
+function resolveVersion() {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(-2);
+  const pad = (n) => String(n).padStart(2, "0");
+  const mmdd = `${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const minute = pad(now.getMinutes());
 
-  const buildNumber = firstNonEmpty(process.env[buildNumberEnvName]);
-  if (!buildNumber) {
-    throw new Error(
-      `未读取到构建号，请确认环境变量 "${buildNumberEnvName}" 是否存在且有值`
-    );
-  }
-  return buildNumber.slice(0, 64);
+  const buildNumberRaw = firstNonEmpty(process.env.BUILD_NUMBER);
+  const buildNumber = buildNumberRaw
+    ? buildNumberRaw.replace(/[^0-9]/g, "")
+    : "";
+  const patchPart = buildNumber || minute;
+
+  return `${yy}.${mmdd}.${patchPart}`;
 }
 
 function readPrivateKey() {
@@ -162,7 +153,7 @@ async function main() {
   const projectPath = path.resolve(
     firstNonEmpty(args.projectPath, process.env.WX_PROJECT_PATH) || process.cwd()
   );
-  const version = resolveVersion(args.buildNumberEnv);
+  const version = resolveVersion();
   const desc =
     firstNonEmpty(args.desc, process.env.WX_DESC, process.env.CI_COMMIT_MESSAGE) ||
     "auto publish by CI";
