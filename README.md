@@ -5,19 +5,19 @@
 ## 通过 npx 调用
 
 ```bash
-npx -y wx-mini-program-publisher@0.1.3
+npx -y wx-mini-program-publisher@0.1.4
 ```
 
 也可以带参数：
 
 ```bash
-npx -y wx-mini-program-publisher@0.1.3 \
+npx -y wx-mini-program-publisher@0.1.4 \
   --project-path ./miniprogram \
   --desc "ci auto release" \
   --robot 1
 ```
 
-> 建议在 CI 中始终使用 `-y`（跳过交互确认）并固定版本号（如 `@0.1.3`）以保证发布流程稳定可复现。
+> 建议在 CI 中始终使用 `-y`（跳过交互确认）并固定版本号（如 `@0.1.4`）以保证发布流程稳定可复现。
 
 发布版本号读取规则：
 - 微信上传 `version` 使用三段格式：`YY.MMDD.xxx`
@@ -39,8 +39,6 @@ npx -y wx-mini-program-publisher@0.1.3 \
 
 ### 可选
 
-- `WX_PROJECT_PATH`：小程序项目目录，默认当前目录
-- `BUILD_NUMBER`：流水线构建号（用于生成 `YY.MMDD.BUILD_NO` 的第三段）
 - `WX_DESC`：版本描述
 - `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串
@@ -52,7 +50,6 @@ npx -y wx-mini-program-publisher@0.1.3 \
   env:
     WX_APPID: ${{ secrets.WX_APPID }}
     WX_PRIVATE_KEY_BASE64: ${{ secrets.WX_PRIVATE_KEY_BASE64 }}
-    BUILD_NUMBER: ${{ github.run_number }}
     WX_DESC: ${{ github.event.head_commit.message }}
-  run: npx -y wx-mini-program-publisher@0.1.3 --project-path ./miniprogram --robot 1
+  run: npx -y wx-mini-program-publisher@0.1.4 --project-path ./miniprogram --robot 1
 ```

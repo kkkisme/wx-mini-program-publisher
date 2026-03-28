@@ -30,13 +30,13 @@ function printHelp() {
   WX_PRIVATE_KEY / PRIVATE_KEY
 
   # 可选
-  WX_PROJECT_PATH
   WX_DESC
   WX_ROBOT
   WX_CI_SETTING_JSON
-  
-  # 版本号
-  BUILD_NUMBER (可选；若缺失则使用当前分钟 mm)
+
+版本号规则:
+  自动生成 YY.MMDD.xxx
+  优先使用流水线内置 BUILD_NUMBER 作为 xxx，若缺失则使用当前分钟 mm
 `);
 }
 
@@ -151,7 +151,7 @@ async function main() {
   }
 
   const projectPath = path.resolve(
-    firstNonEmpty(args.projectPath, process.env.WX_PROJECT_PATH) || process.cwd()
+    firstNonEmpty(args.projectPath) || process.cwd()
   );
   const version = resolveVersion();
   const desc =
