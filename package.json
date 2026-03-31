@@ -1,6 +1,6 @@
 {
   "name": "wx-mini-program-publisher",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "CLI for publishing WeChat Mini Programs in CI",
   "bin": {
     "wx-mini-program-publisher": "bin/publish.js",
