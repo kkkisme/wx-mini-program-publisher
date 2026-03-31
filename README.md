@@ -17,7 +17,7 @@ npx -y wx-mini-program-publisher@0.1.7 \
   --robot 1
 ```
 
-不提供 `WX_DESC` / `WX_ROBOT`；请用 `--desc`、`--robot` 传入。未传 `--desc` 时会回退读取环境变量 `CI_COMMIT_MESSAGE`；未传 `--robot` 时默认为 `1`。
+版本描述用 `--desc` 指定；省略时会读取环境变量 `CI_COMMIT_MESSAGE`（CI 里常用）。机器人编号用 `--robot`，省略时默认为 `1`。
 
 > 建议在 CI 中始终使用 `-y`（跳过交互确认）并固定版本号（如 `@0.1.7`）以保证发布流程稳定可复现。
 
