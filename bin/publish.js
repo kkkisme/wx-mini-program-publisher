@@ -15,7 +15,7 @@ function printHelp() {
 
 可选参数:
   -p, --project-path <path>   小程序项目路径 (默认: 当前目录)
-  -d, --desc <text>           版本描述 (默认: 取环境变量 WX_DESC / CI_COMMIT_MESSAGE)
+  -d, --desc <text>           版本描述 (默认: 取环境变量 CI_COMMIT_MESSAGE)
   -r, --robot <number>        机器人编号 1-30 (默认: 1)
       --setting-json <json>   透传 miniprogram-ci upload.setting JSON
       --dry-run               仅打印配置，不实际发布
@@ -30,13 +30,11 @@ function printHelp() {
   WX_PRIVATE_KEY / PRIVATE_KEY
 
   # 可选
-  WX_DESC
-  WX_ROBOT
   WX_CI_SETTING_JSON
 
 版本号规则:
   自动生成 YY.MMDD.xxx
-  优先使用流水线内置 BUILD_NUMBER 作为 xxx，若缺失则使用当前分钟 mm
+  优先使用流水线内置 BUILD_NUMBER 作为 xxx，若缺失则使用当前时分 HHmm
 `);
 }
 
@@ -154,10 +152,10 @@ async function main() {
   );
   const version = resolveVersion();
   const desc =
-    firstNonEmpty(args.desc, process.env.WX_DESC, process.env.CI_COMMIT_MESSAGE) ||
+    firstNonEmpty(args.desc, process.env.CI_COMMIT_MESSAGE) ||
     "auto publish by CI";
 
-  const robotRaw = firstNonEmpty(args.robot, process.env.WX_ROBOT) || "1";
+  const robotRaw = firstNonEmpty(args.robot) || "1";
   const robot = Number.parseInt(robotRaw, 10);
   if (Number.isNaN(robot) || robot < 1 || robot > 30) {
     throw new Error("robot 必须是 1 到 30 的整数");

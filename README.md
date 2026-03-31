@@ -17,6 +17,8 @@ npx -y wx-mini-program-publisher@0.1.5 \
   --robot 1
 ```
 
+不提供 `WX_DESC` / `WX_ROBOT`；请用 `--desc`、`--robot` 传入。未传 `--desc` 时会回退读取环境变量 `CI_COMMIT_MESSAGE`；未传 `--robot` 时默认为 `1`。
+
 > 建议在 CI 中始终使用 `-y`（跳过交互确认）并固定版本号（如 `@0.1.5`）以保证发布流程稳定可复现。
 
 发布版本号读取规则：
@@ -39,8 +41,6 @@ npx -y wx-mini-program-publisher@0.1.5 \
 
 ### 可选
 
-- `WX_DESC`：版本描述
-- `WX_ROBOT`：机器人编号（1-30）
 - `WX_CI_SETTING_JSON`：自定义 `miniprogram-ci upload.setting` JSON 字符串
 
 ## CI 使用示例（GitHub Actions）
@@ -50,6 +50,5 @@ npx -y wx-mini-program-publisher@0.1.5 \
   env:
     WX_APPID: ${{ secrets.WX_APPID }}
     WX_PRIVATE_KEY_BASE64: ${{ secrets.WX_PRIVATE_KEY_BASE64 }}
-    WX_DESC: ${{ github.event.head_commit.message }}
-  run: npx -y wx-mini-program-publisher@0.1.5 --project-path ./miniprogram --robot 1
+  run: npx -y wx-mini-program-publisher@0.1.5 --project-path ./miniprogram --desc "${{ github.event.head_commit.message }}" --robot 1
 ```
