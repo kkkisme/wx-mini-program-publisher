@@ -103,13 +103,12 @@ function resolveVersion() {
   const yy = String(now.getFullYear()).slice(-2);
   const pad = (n) => String(n).padStart(2, "0");
   const mmdd = `${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
-  const minute = pad(now.getMinutes());
-
+  const hhmm = `${pad(now.getHours())}${pad(now.getMinutes())}`;
   const buildNumberRaw = firstNonEmpty(process.env.BUILD_NUMBER);
   const buildNumber = buildNumberRaw
     ? buildNumberRaw.replace(/[^0-9]/g, "")
     : "";
-  const patchPart = buildNumber || minute;
+  const patchPart = buildNumber || hhmm;
 
   return `${yy}.${mmdd}.${patchPart}`;
 }
