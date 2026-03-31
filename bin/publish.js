@@ -115,13 +115,19 @@ function resolveVersion(buildNumberEnvFromArgs) {
     throw new Error(`无效的版本号环境变量名: ${buildNumberEnvName}`);
   }
 
-  const buildNumber = firstNonEmpty(process.env[buildNumberEnvName]);
-  if (!buildNumber) {
-    throw new Error(
-      `未找到版本号，请在流水线环境变量中设置 ${buildNumberEnvName}`
-    );
-  }
-  return buildNumber.slice(0, 64);
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  const mmdd = `${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const hhmm = `${pad(now.getHours())}${pad(now.getMinutes())}`;
+
+  const buildNumberRaw = firstNonEmpty(process.env[buildNumberEnvName]);
+  const buildNumber = buildNumberRaw
+    ? buildNumberRaw.replace(/[^0-9]/g, "")
+    : "";
+  const patchPart = buildNumber || hhmm;
+
+  return `${yy}.${mmdd}.${patchPart}`;
 }
 
 function readPrivateKey() {
