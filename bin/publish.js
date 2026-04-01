@@ -221,5 +221,5 @@ async function main() {
 
 main().catch((error) => {
   console.error("发布失败:", error?.message || error);
-  process.exitCode = 1;
+  process.exit(1);
 });
